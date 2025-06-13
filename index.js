@@ -19,9 +19,16 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async msg => {
+
+  // debug log
   console.log('[DBG] messageCreate:', msg.id, msg.attachments.size, msg.content);
+  console.log('[DBG] msg.partial', msg.partial);
+  console.log('[DBG] attachments', msg.attachments.size);
+  console.log('[DBG] embeds',       msg.embeds.length);
+
   if (msg.channel.id !== TARGET_CHANNEL) return;           // 別チャンネルは無視
   if (!msg.attachments.size) return;                       // 添付なしは無視
+
 
   for (const [, attach] of msg.attachments) {
     if (!attach.contentType?.startsWith('image/')) continue;
