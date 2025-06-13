@@ -1,0 +1,13 @@
+services:
+  - type: worker          # Web サーバーではなく常駐 Worker
+    name: discord-resize-bot
+    env: node
+    plan: free
+    autoDeploy: true      # push で自動デプロイ
+    buildCommand: "npm install --production"
+    startCommand: "node index.js"
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false       # Render のダッシュボードで入力
+      - key: TARGET_CHANNEL_ID
+        sync: false
