@@ -19,6 +19,7 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async msg => {
+  console.log('[DBG] messageCreate:', msg.id, msg.attachments.size, msg.content);
   if (msg.channel.id !== TARGET_CHANNEL) return;           // 別チャンネルは無視
   if (!msg.attachments.size) return;                       // 添付なしは無視
 
