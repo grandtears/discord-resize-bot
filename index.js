@@ -9,8 +9,7 @@ const MAX_SIZE        = 2048;                           // 長辺の上限
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.GuildMessages
   ],
   partials: [Partials.Channel]
 });
