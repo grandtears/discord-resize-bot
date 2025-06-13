@@ -58,7 +58,10 @@ async function handleImageMessage(msg) {
           fit: 'inside',
           withoutEnlargement: true
         })
-        [`to${outFmt.charAt(0).toUpperCase() + outFmt.slice(1)}`]()
+        .toFormat(
+          outFmt,
+          outFmt === 'jpeg' ? { mozjpeg: true } : undefined
+        )
         .toBuffer();
 
       // ── 返信
