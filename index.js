@@ -58,4 +58,15 @@ client.on('messageCreate', async msg => {
   }
 });
 
+// ここから HTTP Keep-Alive 用
+import express from 'express';
+const PORT = process.env.PORT || 8080;   // Render が PORT を注入
+
+const app = express();
+app.get('/ping', (_, res) => res.json({ ok: true, ts: Date.now() }));
+app.get('/',      (_, res) => res.send('Bot Alive')); // HealthCheck 兼トップ
+
+app.listen(PORT, () => console.log(`Keep-alive server on :${PORT}`));
+
+
 client.login(TOKEN);
