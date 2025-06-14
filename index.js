@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Partials, AttachmentBuilder } from 'discord.
 import sharp from 'sharp';
 import { request } from 'undici';
 import express from 'express';
+import cropFrame from './cropFrame.js';
 
 // ──────────── 環境変数 ────────────
 const TOKEN           = process.env.DISCORD_TOKEN;
@@ -38,12 +39,16 @@ async function handleImageMessage(msg) {
       const res  = await request(at.url);
       const orig = Buffer.from(await res.body.arrayBuffer());
 
-      // ── メタデータ取得
-      const img  = sharp(orig).rotate();            // EXIF に合わせ自動回転
+      // ── 額縁があればトリム
+      const { buf: readyBuf, cropped } = await cropFrame(orig);
+
+      // ── 回転補正 & メタ取得
+      const img  = sharp(readyBuf).rotate();
       const meta = await img.metadata();
       const { width, height, format } = meta;
 
-      if (Math.max(width, height) <= MAX_SIZE) continue; // 小さいなら無視
+      // ── リサイズ不要ならスキップ
+      if (Math.max(width, height) <= MAX_SIZE && !cropped) continue;
 
       // ── 出力フォーマット（PNG は PNG のまま）
       const supported = ['jpeg', 'png', 'webp', 'avif', 'gif', 'tiff'];
@@ -51,7 +56,7 @@ async function handleImageMessage(msg) {
       const newExt  = outFmt === 'jpeg' ? '.jpg' : '.' + outFmt;
 
       // ── リサイズ
-      const buf = await img
+      const resized = await img
         .resize({
           width:  width >= height ? MAX_SIZE : null,
           height: height >  width ? MAX_SIZE : null,
@@ -64,13 +69,18 @@ async function handleImageMessage(msg) {
         )
         .toBuffer();
 
-      // ── 返信
-      const fileName = at.name.replace(/\.[^.]+$/, '') + `_resized${newExt}`;
-      const file     = new AttachmentBuilder(buf, { name: fileName });
+      // ── ファイル名生成
+      const base = at.name.replace(/\.[^.]+$/, '');
+      const fileName = `${base}${cropped ? '_cropped' : ''}_resized${newExt}`;
+      const file = new AttachmentBuilder(resized, { name: fileName });
 
-      await msg.reply({ content: `🔄 Resized ${at.name}`, files: [file] });
-    } catch (e) {
-      console.error('Resize failed:', e);
+      // ── 返信
+      await msg.reply({
+        content: `🔄 Processed ${at.name}${cropped ? ' (cropped)' : ''}`,
+        files: [file]
+      });
+    } catch (err) {
+      console.error('Process failed:', err);
     }
   }
 }
