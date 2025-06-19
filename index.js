@@ -2,13 +2,13 @@ import { Client, GatewayIntentBits, Partials, AttachmentBuilder } from 'discord.
 import sharp from 'sharp';
 import { request } from 'undici';
 import express from 'express';
+import cropFrame from './cropFrame.js';
 
 // ──────────── 環境変数 ────────────
 const TOKEN = process.env.DISCORD_TOKEN;
-const TARGET_CHANNEL = process.env.TARGET_CHANNEL_ID;      // 監視対象 (親 or スレッド)
+const TARGET_CHANNEL = process.env.TARGET_CHANNEL_ID
 const MAX_SIZE = Number(process.env.MAX_SIZE) || 2048;
 
-// 新しく追加するトリミング関連の環境変数
 const TRIM_TARGET_WIDTH = Number(process.env.TRIM_TARGET_WIDTH) || 2048;
 const TRIM_TARGET_HEIGHT = Number(process.env.TRIM_TARGET_HEIGHT) || 1440;
 const TRIM_LEFT = Number(process.env.TRIM_LEFT) || 64;
